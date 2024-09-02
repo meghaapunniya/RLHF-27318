@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Teaser Widget</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .widget {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #4a4a4a;
+        }
+
+        .puzzle {
+            margin: 15px 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        input[type="time"] {
+            font-size: 16px;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 150px;
+        }
+
+        input[type="text"] {
+            font-size: 16px;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 250px;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        select {
+            font-size: 16px;
+            padding: 5px;
+            margin: 10px 0;
+        }
+
+        #hintContainer {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
+
+        #stats {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #4a4a4a;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="widget">
+        <h1>Brain Teaser</h1>
+        <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+        <div class="puzzle" id="puzzleContainer"></div>
+        <button onclick="revealHint()">Get Hint</button>
+        <div id="hintContainer"></div>
+        <input type="text" id="answerInput" placeholder="Your answer">
+        <button onclick="checkAnswer()">Check Answer</button>
+        <div id="stats"></div>
+        <input type="time" id="reminder-time" placeholder="HH:MM">
+        <button id="set-reminder">Set Reminder</button>
+    </div>
+
+    <script>
+        const puzzles = {
+            easy: [
+                {
+                    question: "What has keys, but no locks; space, but no room; you can enter, but can't go in?",
+                    answer: "A keyboard",
+                    hints: [
+                        "It's a device used to input information into a computer.",
+                        "It has buttons that you press to type.",
+                        "It's not a physical room, but a virtual one."
+                    ]
+                },
+                {
+                    question: "What has a face and two hands but no arms or legs?",
+                    answer: "A clock",
+                    hints: [
+                        "It's an object that tells the time.",
+                        "It has a circular face with numbers around the edge.",
+                        "The 'hands' move to indicate the time."
+                    ]
+                },
+                {
+                    question: "What has a neck but no head?",
+                    answer: "A bottle",
+                    hints: [
+                        "It's a container used to hold liquids.",
+                        "It has a narrow, cylindrical shape.",
+                        "It's often made of glass or plastic."
+                    ]
+                }
+            ],
+            medium: [
+                {
+                    question: "I am always hungry, I must always be fed, the finger I touch will soon turn red.",
+                    answer: "Fire",
+                    hints: [
+                        "It's a source of heat and light.",
+                        "It can be used to cook food.",
+                        "It can be dangerous if not handled properly."
+                    ]
+                },
+                {
+                    question: "What has a face and two hands but no arms or legs?",
+                    answer: "A clock",
+                    hints: [
+                        "It's an object that tells the time.",
+                        "It has a circular face with numbers around the edge.",
+                        "The 'hands' move to indicate the time."
+                    ]
+                },
+                {
+                    question: "What has a neck but no head?",
+                    answer: "A bottle",
+                    hints: [
+                        "It's a container used to hold liquids.",
+                        "It has a narrow, cylindrical shape.",
+                        "It's often made of glass or plastic."
+                    ]
+                }
+            ],
+            hard: [
+                {
+                    question: "I am the beginning of the end, the end of every place. I am the beginning of eternity, the end of time and space.",
+                    answer: "The letter 'e'",
+                    hints: [
+                        "It's the most common letter in the English language.",
+                        "It's the only vowel in the word 'end'.",
+                        "It's the last letter in the word 'space'."
+                    ]
+                },
+                {
+                    question: "What can travel all around the world while staying in a corner?",
+                    answer: "A stamp",
+                    hints: [
+                        "It's used to send letters and packages.",
+                        "It's a small, adhesive label that is attached to mail.",
+                        "It can be used to travel all over the world, but it stays in one place on the envelope."
+                    ]
+                },
+                {
+                    question: "I am always hungry, I must always be fed, the finger I touch will soon turn red.",
+                    answer: "Fire",
+                    hints: [
+                        "It's a source of heat and light.",
+                        "It can be used to cook food.",
+                        "It can be dangerous if not handled properly."
+                    ]
+                }
+            ]
+        };
+
+
+        let currentPuzzle;
+        let hints = [];
+        let hintIndex = 0;
+        let puzzlesSolved = 0;
+        let puzzlesAttempted = 0;
+        let currentStreak = 0;
+        let longestStreak = 0;
+
+
+        function loadStats() {
+            const storedStats = JSON.parse(localStorage.getItem('stats'));
+            if (storedStats) {
+                puzzlesSolved = storedStats.puzzlesSolved;
+                puzzlesAttempted = storedStats.puzzlesAttempted;
+                currentStreak = storedStats.currentStreak;
+                longestStreak = storedStats.longestStreak;
+            }
+            updateStats();
+        }
+
+        function saveStats() {
+            const stats = {
+                puzzlesSolved,
+                puzzlesAttempted,
+                currentStreak,
+                longestStreak
+            };
+            localStorage.setItem('stats', JSON.stringify(stats));
+        }
+
+        function generatePuzzle() {
+            const difficulty = $('#difficulty').val();
+            const puzzleIndex = Math.floor(Math.random() * puzzles[difficulty].length);
+            currentPuzzle = puzzles[difficulty][puzzleIndex];
+            hints = currentPuzzle.hints || [];
+            hintIndex = 0;
+            $('#puzzleContainer').text(currentPuzzle.question);
+            $('#hintContainer').text('');
+            $('#answerInput').val('');
+        }
+
+        // Add an event listener to the difficulty select element
+        $('#difficulty').on('change', generatePuzzle);
+
+        function revealHint() {
+            if (hintIndex < hints.length) {
+                $('#hintContainer').text(hints[hintIndex]);
+                hintIndex++;
+            } else {
+                $('#hintContainer').text('No more hints available.');
+            }
+        }
+
+        function checkAnswer() {
+            const userAnswer = $('#answerInput').val().toLowerCase();
+            if (userAnswer === currentPuzzle.answer.toLowerCase()) {
+                toastr.success('Correct! Well done.');
+                puzzlesSolved++;
+                puzzlesAttempted++;
+                currentStreak++;
+                if (currentStreak > longestStreak) {
+                    longestStreak = currentStreak;
+                }
+                updateStats();
+                saveStats();
+                generatePuzzle();
+            } else {
+                toastr.error('Incorrect. Please try again.');
+                puzzlesAttempted++;
+                currentStreak = 0;
+                updateStats();
+                saveStats();
+            }
+        }
+
+        let reminderTimeout;
+
+        function setReminder() {
+            const reminderTimeInput = document.getElementById('reminder-time');
+            const reminderTime = reminderTimeInput.value;
+            if (reminderTime) {
+                toastr.options = {
+                    "closeButton": true,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-right",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "0",
+                    "extendedTimeOut": "0",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                };
+
+                // Parse the user-entered time
+                const [hours, minutes] = reminderTime.split(':');
+                let reminderHours = parseInt(hours);
+                const reminderMinutes = parseInt(minutes);
+
+                // Calculate the time until the next reminder
+                const now = new Date();
+                let reminderDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), reminderHours, reminderMinutes, 0);
+                if (reminderDate < now) {
+                    reminderDate.setDate(reminderDate.getDate() + 1);
+                }
+                const timeUntilReminder = reminderDate.getTime() - now.getTime();
+
+                // Set the reminder
+                if (reminderTimeout) {
+                    clearTimeout(reminderTimeout);
+                }
+                reminderTimeout = setTimeout(() => {
+                    toastr.info('Time for your daily brain teaser!');
+                    setReminder(); // Reset the reminder
+                }, timeUntilReminder);
+
+                // Save the reminder time to localStorage
+                localStorage.setItem('reminderTime', reminderTime);
+
+                toastr.info(`Daily reminder set for ${reminderTime}.`);
+            }
+        }
+
+        // Load the reminder time from localStorage, if available
+        const storedReminderTime = localStorage.getItem('reminderTime');
+        if (storedReminderTime) {
+            document.getElementById('reminder-time').value = storedReminderTime;
+            setReminder();
+        }
+
+        // Set reminder when the "Set Reminder" button is clicked
+        document.getElementById('set-reminder').addEventListener('click', setReminder);
+
+
+
+        function updateStats() {
+            $('#stats').text(`Puzzles Solved: ${puzzlesSolved} | Puzzles Attempted: ${puzzlesAttempted} | Current Streak: ${currentStreak} | Longest Streak: ${longestStreak}`);
+        }
+        generatePuzzle();
+        loadStats();
+    </script>
+</body>
+
+</html>
