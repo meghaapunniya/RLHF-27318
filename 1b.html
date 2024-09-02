@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Brain Teaser Widget</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
+    />
+    <style>
+      body {
+        font-family: 'Comic Sans MS', cursive;
+        background: #f0f8ff;
+      }
+      .widget {
+        max-width: 500px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 2px solid #4caf50;
+        border-radius: 15px;
+      }
+      .button.is-kid-friendly {
+        background-color: #ffdd57;
+        color: #363636;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="widget">
+      <h1 class="title">Puzzle Time!</h1>
+      <div id="puzzleArea"></div>
+      <button class="button is-kid-friendly" onclick="getNewPuzzle()">
+        New Puzzle
+      </button>
+      <button class="button is-light" onclick="showHint()">Hint</button>
+      <div id="hintArea" style="display: none">
+        <p id="hintText"></p>
+      </div>
+      <div id="notificationSettings">
+        <label>Set Notification Time:</label>
+        <input type="time" id="notifyTime" onchange="setNotificationTime()" />
+      </div>
+      <div id="stats">
+        <p>Streak: <span id="streak">0</span></p>
+        <p>Puzzles Solved: <span id="solved">0</span></p>
+      </div>
+    </div>
+    <script>
+      const puzzles = {
+        easy: [
+          {
+            q: 'What has to be broken before you can use it?',
+            a: 'egg',
+            hints: [
+              "It's usually breakfast-related.",
+              'You might need to crack it.',
+              "It's not an apple.",
+            ],
+          },
+          //... more puzzles
+        ],
+        // medium and hard puzzles...
+      };
+
+      let currentPuzzle;
+      let hintIndex = 0;
+
+      function getNewPuzzle() {
+        const difficulty = localStorage.getItem('difficulty') || 'easy';
+        currentPuzzle =
+          puzzles[difficulty][
+            Math.floor(Math.random() * puzzles[difficulty].length)
+          ];
+        document.getElementById('puzzleArea').innerText = currentPuzzle.q;
+        document.getElementById('hintArea').style.display = 'none';
+        hintIndex = 0;
+      }
+
+      function showHint() {
+        if (hintIndex < currentPuzzle.hints.length) {
+          document.getElementById('hintText').innerText =
+            currentPuzzle.hints[hintIndex];
+          document.getElementById('hintArea').style.display = 'block';
+          hintIndex++;
+        }
+      }
+
+      function setNotificationTime() {
+        const time = document.getElementById('notifyTime').value;
+        // Here you would set up a daily local notification at 'time'
+        // This would require service worker for web or native app capabilities
+        console.log('Notification set for:', time);
+      }
+
+      function initialize() {
+        if (!localStorage.getItem('stats')) {
+          localStorage.setItem(
+            'stats',
+            JSON.stringify({ streak: 0, solved: 0 })
+          );
+        }
+        updateStats();
+        getNewPuzzle();
+      }
+
+      function updateStats() {
+        const stats = JSON.parse(localStorage.getItem('stats'));
+        document.getElementById('streak').innerText = stats.streak;
+        document.getElementById('solved').innerText = stats.solved;
+      }
+
+      // Call initialize on load
+      initialize();
+    </script>
+  </body>
+</html>
